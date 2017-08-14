@@ -1,13 +1,29 @@
-// Created by Yaz Saito on 06/15/12.
-// Modified by Geert-Johan Riemer, Foize B.V.
+// Modified by ZRY From go.fifo (github.com/foize/go.fifo) on 2017.08.15
+// This is a size limited FIFO modified from github.com/foize/go.fifo
+/*
+	ModifierZRY := AuthorInfo{
+		nickname: "ZRY",
+		alias: "swzry",
+		website: "http://www.swzry.com/",
+		email: "admin@z-touhou.org",
+		personal_git: "https://git.swzry.com/",
+		github: "github.com/swzry/",
+	}
+ */
+// ------------------------------------------------------------------------
+// 'github.com/foize/go.fifo' was Created by Yaz Saito on 06/15/12.
+// 'github.com/foize/go.fifo' was Modified by Geert-Johan Riemer, Foize B.V.
 
-package fifo
+package limitfifo
 
 import (
 	"math/rand"
 	"testing"
 )
+// ==== TODO_go.limitfifo ====
+//++ TODO: Test for the size limitation
 
+// ==== TODO_go.fifo ====
 //++ TODO: Add test for empty queue
 //++ TODO: Find a way to test the thread-safety
 //++ TODO: Add test for large queue
@@ -19,7 +35,7 @@ func testAssert(t *testing.T, b bool, objs ...interface{}) {
 }
 
 func TestBasic(t *testing.T) {
-	q := NewQueue()
+	q := NewLimitQueue(4)
 	testAssert(t, q.Len() == 0, "Could not assert that new Queue has length zero (0).")
 	q.Add(10)
 	testAssert(t, q.Len() == 1, "Could not assert that Queue has lenght 1 after adding one item.")
@@ -33,7 +49,7 @@ func TestBasic(t *testing.T) {
 
 func TestRandomized(t *testing.T) {
 	var first, last int
-	q := NewQueue()
+	q := NewLimitQueue(4)
 	for i := 0; i < 10000; i++ {
 		if rand.Intn(2) == 0 {
 			count := rand.Intn(128)
@@ -52,5 +68,36 @@ func TestRandomized(t *testing.T) {
 				first++
 			}
 		}
+	}
+}
+
+func TestSizeLimitation(t *testing.T){
+	q := NewLimitQueue(4)
+	for i := 0; i < 256; i++ {
+		e := q.SafeAdd(1)
+		if(e != nil){
+			switch (e.Error()) {
+				case "can not add nil item to fifo queue":
+					t.Fatal("can not add nil item to fifo queue")
+				case "out of max chunk number":
+					t.Fatal("overflow before limitation")
+				default:
+					t.Fatal(e.Error())
+			}
+		}
+	}
+	testAssert(t, q.Len() == 256, "size not match")
+	e := q.SafeAdd(1)
+	if(e != nil){
+		switch (e.Error()) {
+		case "can not add nil item to fifo queue":
+			t.Fatal("can not add nil item to fifo queue")
+		case "out of max chunk number":
+			return
+		default:
+			t.Fatal(e.Error())
+		}
+	}else {
+		t.Fatal("limitation does not work")
 	}
 }

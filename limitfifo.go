@@ -1,11 +1,20 @@
-// Created by Yaz Saito on 06/15/12.
-// Modified by Geert-Johan Riemer, Foize B.V.
+// Modified by ZRY From go.fifo (github.com/foize/go.fifo) on 2017.08.15
+// This is a size limited FIFO modified from github.com/foize/go.fifo
+/*
+	ModifierZRY := AuthorInfo{
+		nickname: "ZRY",
+		alias: "swzry",
+		website: "http://www.swzry.com/",
+		email: "admin@z-touhou.org",
+		personal_git: "https://git.swzry.com/",
+		github: "github.com/swzry/",
+	}
+ */
+// ------------------------------------------------------------------------
+// 'github.com/foize/go.fifo' was Created by Yaz Saito on 06/15/12.
+// 'github.com/foize/go.fifo' was Modified by Geert-Johan Riemer, Foize B.V.
 
-// TODO:
-// - travis CI
-// - maybe add method (*Queue).Peek()
-
-package fifo
+package limitfifo
 
 import (
 	"sync"
@@ -22,15 +31,17 @@ type chunk struct {
 
 // fifo queue
 type Queue struct {
-	head, tail *chunk     // chunk head and tail
-	count      int        // total amount of items in the queue
-	lock       sync.Mutex // synchronisation lock
+	head, tail 		*chunk     // chunk head and tail
+	maxsize			int
+	count			int        // total amount of items in the queue
+	lock			sync.Mutex // synchronisation lock
 }
 
 // NewQueue creates a new and empty *fifo.Queue
-func NewQueue() (q *Queue) {
+func NewLimitQueue(maxChunkNum int) (q *Queue) {
 	initChunk := new(chunk)
 	q = &Queue{
+		maxsize: maxChunkNum * chunkSize,
 		head: initChunk,
 		tail: initChunk,
 	}
@@ -61,14 +72,68 @@ func (q *Queue) Add(item interface{}) {
 
 	// if the tail chunk is full, create a new one and add it to the queue.
 	if q.tail.last >= chunkSize {
-		q.tail.next = new(chunk)
-		q.tail = q.tail.next
+		if q.count < q.maxsize{
+			q.tail.next = new(chunk)
+			q.tail = q.tail.next
+		}else{
+			panic("out of max chunk number")
+		}
+		
 	}
 
 	// add item to the tail chunk at the last position
 	q.tail.items[q.tail.last] = item
 	q.tail.last++
 	q.count++
+}
+
+const (
+	ERR_ADD_NIL = iota
+	ERR_OUT_OF_SIZE_LIMIT
+)
+
+type ErrLimitFIFO struct {
+	eid int
+}
+
+func (this ErrLimitFIFO) Error() string {
+	switch(this.eid){
+		case ERR_ADD_NIL:
+			return "can not add nil item to fifo queue"
+		case ERR_OUT_OF_SIZE_LIMIT:
+			return "out of max chunk number"
+		default:
+			return "unknown error"
+
+	}
+}
+
+func (q *Queue) SafeAdd(item interface{}) error {
+	// locking to make Queue thread-safe
+	q.lock.Lock()
+	defer q.lock.Unlock()
+
+	// check if item is valid
+	if item == nil {
+		return ErrLimitFIFO{eid: ERR_ADD_NIL}
+	}
+
+	// if the tail chunk is full, create a new one and add it to the queue.
+	if q.tail.last >= chunkSize {
+		if q.count < q.maxsize{
+			q.tail.next = new(chunk)
+			q.tail = q.tail.next
+		}else{
+			return ErrLimitFIFO{eid: ERR_OUT_OF_SIZE_LIMIT}
+		}
+	}
+
+	// add item to the tail chunk at the last position
+	q.tail.items[q.tail.last] = item
+	q.tail.last++
+	q.count++
+
+	return nil
 }
 
 // Remove the item at the head of the queue and return it.

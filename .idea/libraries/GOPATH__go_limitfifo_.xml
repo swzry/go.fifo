@@ -1,0 +1,28 @@
+<component name="libraryTable">
+  <library name="GOPATH &lt;go.limitfifo&gt;">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/../../../git.u.sagume.com" />
+      <root url="file://$PROJECT_DIR$/../../../sw.sagume.com" />
+      <root url="file://$PROJECT_DIR$/../../../git.czq233.com" />
+      <root url="file://$PROJECT_DIR$/../../../gopkg.in" />
+      <root url="file://$PROJECT_DIR$/../../../localgit" />
+      <root url="file://$PROJECT_DIR$/../.." />
+      <root url="file://$PROJECT_DIR$/../../../git.swzry.com" />
+      <root url="file://$PROJECT_DIR$/../../../local_no_vcs" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/../../../git.u.sagume.com" />
+      <root url="file://$PROJECT_DIR$/../../../sw.sagume.com" />
+      <root url="file://$PROJECT_DIR$/../../../git.czq233.com" />
+      <root url="file://$PROJECT_DIR$/../../../gopkg.in" />
+      <root url="file://$PROJECT_DIR$/../../../localgit" />
+      <root url="file://$PROJECT_DIR$/../.." />
+      <root url="file://$PROJECT_DIR$/../../../git.swzry.com" />
+      <root url="file://$PROJECT_DIR$/../../../local_no_vcs" />
+    </SOURCES>
+    <excluded>
+      <root url="file://$PROJECT_DIR$" />
+    </excluded>
+  </library>
+</component>
