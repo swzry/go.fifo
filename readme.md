@@ -35,7 +35,10 @@ func main() {
 	numbers.Add(9)
 
 	// add items to the queue, use 'SafeAdd' to catch if there's an error occur.
-    err := numbers.SafeAdd(32)
+	err := numbers.SafeAdd(32)
+	if(err != nil){
+	    fmt.Println("An Error Occur: ", err.Error())
+	}
 
 	// retrieve items from the queue
 	fmt.Println(numbers.Next()) // 5
@@ -49,6 +52,7 @@ func main() {
 
 You can refer to the [README.md of 'go.fifo'](https://github.com/foize/go.fifo/blob/master/readme.md).
 
+For your convenience, I copied it below :)
 
 ### The README.md of go.fifo
 
