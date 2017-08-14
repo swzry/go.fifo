@@ -1,15 +1,67 @@
-## go.fifo
+## go.limitfifo
 
 ### Description
-go.fifo provides a simple FIFO thread-safe queue.
+
+This package is modified from go.fifo (github.com/foize/go.fifo).
+It's a buffer size limited version in order to prevent memory overflow in some application scenes.
+
+e.g.
+If you need a fifo buffer for a serial port communicating multiplexer,
+when the data are coming from many input serial ports,
+we put the data into a fifo buffer. Then we fowarding them into another serial port.
+Unfortunately, the speed of output port is not always enough to send those data.
+If the buffer is unlimited, the memory overflow may occur. To avoid this failure,
+we should drop some input data when the buffer is too large.
+
+### Installation
+`go get github.com/swzry/go.limitfifo`
+
+### Usage
+```go
+package main
+
+import (
+	"github.com/swzry/go.limitfifo"
+	"fmt"
+)
+
+func main() {
+	// create a new queue
+	numbers := fifo.NewLimitQueue(4)  // 4 is the size of chunk, the size of each chunk is 64.
+
+	// add items to the queue
+	numbers.Add(5)
+	numbers.Add(6)
+	numbers.Add(9)
+
+	// add items to the queue, use 'SafeAdd' to catch if there's an error occur.
+    err := numbers.SafeAdd(32)
+
+	// retrieve items from the queue
+	fmt.Println(numbers.Next()) // 5
+	fmt.Println(numbers.Next()) // 6
+	fmt.Println(numbers.Next()) // 9
+	fmt.Println(numbers.Next()) // 32
+}
+```
+
+### Documentations and More
+
+You can refer to the [README.md of 'go.fifo'](https://github.com/foize/go.fifo/blob/master/readme.md).
+
+
+### The README.md of go.fifo
+
+#### Description
+go.limitfifo provides a simple FIFO thread-safe queue.
 *fifo.Queue supports pushing an item at the end with Add(), and popping an item from the front with Next().
 There is no intermediate type for the stored data. Data is directly added and retrieved as type interface{}
 The queue itself is implemented as a single-linked list of chunks containing max 64 items each.
 
-### Installation
+#### Installation
 `go get github.com/foize/go.fifo`
 
-### Usage
+#### Usage
 ```go
 package main
 
@@ -89,11 +141,11 @@ func main() {
 // queue is empty
 ```
 
-### Documentation
+#### Documentation
 Documentation can be found at [godoc.org/github.com/foize/go.fifo](http://godoc.org/github.com/foize/go.fifo).
 For more detailed documentation, read the source.
 
-### History
+#### History
 This package is based on github.com/yasushi-saito/fifo_queue
 There are several differences:
 - renamed package to `fifo` to make usage simpler
